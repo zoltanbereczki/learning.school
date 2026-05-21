@@ -314,7 +314,7 @@ button {
 
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: clamp(14px, 2vw, 22px);
   flex: 1;
   align-items: stretch;
@@ -358,6 +358,10 @@ button {
 
 .menu-card.match {
   background: linear-gradient(145deg, #8b5cf6, #f472b6);
+}
+
+.menu-card.sentence {
+  background: linear-gradient(145deg, #f97316, #facc15);
 }
 
 .menu-icon {
@@ -488,6 +492,31 @@ button {
 .answer-button.wrong {
   background: #ef4444;
   animation: shake 360ms ease both;
+}
+
+.answers-sentence {
+  grid-template-columns: 1fr;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.answer-button-sentence {
+  min-height: 72px;
+  padding: 14px 22px;
+  font-size: clamp(18px, 2.4vw, 24px);
+  line-height: 1.25;
+  text-align: left;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.picture-wrap-large {
+  width: min(520px, 100%);
+}
+
+.picture-card-large {
+  width: min(440px, 86vw);
 }
 
 .progress-row {

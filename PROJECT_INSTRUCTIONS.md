@@ -30,11 +30,12 @@ file:///H:/My%20Drive/Csal%C3%A1d/Hunor/Huni%20Learning/Tanulj%20Romanul/tanuljr
 
 ## Product Summary
 
-The app helps a Hungarian-speaking child practice Romanian vocabulary. The first screen shows lesson cards. After selecting a lesson, the child chooses one of three activities:
+The app helps a Hungarian-speaking child practice Romanian vocabulary. The first screen shows lesson cards. After selecting a lesson, the child chooses one of these activities:
 
 1. `Szó - szó`: Hungarian prompt, Romanian answer choices.
 2. `Kép - szó`: local image prompt, Romanian answer choices.
 3. `Húzd össze`: Hungarian words on the left, Romanian words on the right, matched in batches of 5.
+4. `Kép - mondat`: cropped activity scene from the manual, Romanian sentence as answer choices. This game only appears for lessons that define a `sentences` array (minimum 4 entries).
 
 The UI prompts are in Hungarian. Lesson titles, answer choices, and feedback are in Romanian where appropriate.
 

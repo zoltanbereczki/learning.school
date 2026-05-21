@@ -17,6 +17,57 @@ const lessons = [
       { id: "coarda", hu: "ugrókötél", ro: "coardă", image: "Images/CoardaP100.png", color: "#ec4899" },
       { id: "patine-cu-role", hu: "görkorcsolya", ro: "patine cu role", image: "Images/PatineCuRoleP100.png", color: "#facc15" },
     ],
+    sentences: [
+      {
+        id: "s-leagan",
+        ro: "Fetița se dă în leagăn.",
+        hu: "A kislány hintázik.",
+        image: "Images/ActivityLeaganP100.png",
+        color: "#84cc16",
+      },
+      {
+        id: "s-tobogan",
+        ro: "Bogdan alunecă pe tobogan.",
+        hu: "Bogdan a csúszdán csúszik.",
+        image: "Images/ActivityToboganP100.png",
+        color: "#f59e0b",
+      },
+      {
+        id: "s-balansoar",
+        ro: "Doi copii se dau pe balansoar.",
+        hu: "Két gyerek hintaszéken hintázik.",
+        image: "Images/ActivityBalansoarP100.png",
+        color: "#fb923c",
+      },
+      {
+        id: "s-trotineta",
+        ro: "Mihai se dă cu trotineta.",
+        hu: "Mihai rollerezik.",
+        image: "Images/ActivityTrotinetaP100.png",
+        color: "#0ea5e9",
+      },
+      {
+        id: "s-coarda",
+        ro: "Ioana sare coarda.",
+        hu: "Ioana ugrókötelet ugrál.",
+        image: "Images/ActivityCoardaP100.png",
+        color: "#ec4899",
+      },
+      {
+        id: "s-patine",
+        ro: "Violeta și Ionuț merg pe patine cu role.",
+        hu: "Violeta és Ionuț görkorcsolyázik.",
+        image: "Images/ActivityPatineCuRoleP100.png",
+        color: "#facc15",
+      },
+      {
+        id: "s-minge",
+        ro: "Băieții se joacă cu mingea.",
+        hu: "A fiúk labdával játszanak.",
+        image: "Images/ActivityMingeP100.png",
+        color: "#22c55e",
+      },
+    ],
   },
   {
     id: "padure-animale-si-plante-92",
@@ -210,13 +261,25 @@ function currentWords() {
   return currentLesson().words;
 }
 
+function currentSentences() {
+  return currentLesson().sentences || [];
+}
+
+function hasSentences() {
+  return currentSentences().length >= 4;
+}
+
+function currentItems() {
+  return state.mode === "sentence" ? currentSentences() : currentWords();
+}
+
 function shuffle(items) {
   return [...items].sort(() => Math.random() - 0.5);
 }
 
 function sampleOptions(answer) {
-  const words = currentWords();
-  const choices = shuffle(words.filter((item) => item.id !== answer.id)).slice(0, 3);
+  const pool = currentItems();
+  const choices = shuffle(pool.filter((item) => item.id !== answer.id)).slice(0, 3);
   return shuffle([answer, ...choices]);
 }
 
@@ -234,7 +297,7 @@ function startRound(mode) {
   state.runId += 1;
   state.screen = "game";
   state.mode = mode;
-  state.remaining = shuffle(currentWords());
+  state.remaining = shuffle(mode === "sentence" ? currentSentences() : currentWords());
   state.found = 0;
   state.feedback = "";
   state.feedbackType = "";
@@ -243,7 +306,7 @@ function startRound(mode) {
 }
 
 function nextQuestion() {
-  if (state.mode !== "word" && state.mode !== "picture") return;
+  if (state.mode !== "word" && state.mode !== "picture" && state.mode !== "sentence") return;
 
   if (!state.remaining.length) {
     celebrate();
@@ -301,12 +364,12 @@ function renderFeedback() {
 }
 
 function renderProgress() {
-  const words = currentWords();
+  const items = currentItems();
   const progress = document.querySelector(".progress-fill");
   const label = document.querySelector(".progress-label");
   if (!progress || !label) return;
-  progress.style.width = `${(state.found / words.length) * 100}%`;
-  label.textContent = `${state.found}/${words.length}`;
+  progress.style.width = `${(state.found / items.length) * 100}%`;
+  label.textContent = `${state.found}/${items.length}`;
 }
 
 function startMatchMode() {
@@ -617,35 +680,55 @@ function renderActivityMenu() {
           <p>Balról jobbra</p>
         </div>
       </button>
+      ${
+        hasSentences()
+          ? `<button class="menu-card sentence" data-mode="sentence">
+        <div class="menu-icon">¶</div>
+        <div>
+          <h2>Kép - mondat</h2>
+          <p>Mit csinálnak a képen?</p>
+        </div>
+      </button>`
+          : ""
+      }
     </section>
   `);
 }
 
 function renderQuiz() {
-  const words = currentWords();
+  const items = currentItems();
   const isPicture = state.mode === "picture";
+  const isSentence = state.mode === "sentence";
   const boardContent = isPicture
     ? pictureCard(state.current)
-    : `<div>
+    : isSentence
+      ? sentenceCard(state.current)
+      : `<div>
         <p class="task-label">Keresd meg ezt:</p>
         <div class="target-chip"><h2 class="target-word">${state.current.hu}</h2></div>
       </div>`;
 
+  const prompt = isPicture
+    ? "Melyik román szó illik ehhez?"
+    : isSentence
+      ? "Melyik mondat illik a képhez?"
+      : "";
+
   renderShell(`
     <section class="game-panel">
       <div class="progress-row">
-        <div class="progress-track" aria-label="Haladás"><div class="progress-fill" style="width:${(state.found / words.length) * 100}%"></div></div>
-        <div class="pill progress-label">${state.found}/${words.length}</div>
+        <div class="progress-track" aria-label="Haladás"><div class="progress-fill" style="width:${(state.found / items.length) * 100}%"></div></div>
+        <div class="pill progress-label">${state.found}/${items.length}</div>
       </div>
       <div class="task-board">
-        ${isPicture ? '<p class="task-label">Melyik román szó illik ehhez?</p>' : ""}
+        ${prompt ? `<p class="task-label">${prompt}</p>` : ""}
         ${boardContent}
       </div>
-      <div class="answers">
+      <div class="answers ${isSentence ? "answers-sentence" : ""}">
         ${state.options
           .map(
             (option) =>
-              `<button class="answer-button" data-answer="${option.id}">
+              `<button class="answer-button ${isSentence ? "answer-button-sentence" : ""}" data-answer="${option.id}">
                 ${option.ro}
               </button>`,
           )
@@ -654,6 +737,17 @@ function renderQuiz() {
       <div class="feedback ${state.feedback ? `show ${state.feedbackType}` : ""}">${state.feedback}</div>
     </section>
   `);
+}
+
+function sentenceCard(item) {
+  return `
+    <div class="picture-wrap picture-wrap-large" aria-label="Tevékenység a képen">
+      <div class="picture-card photo-card picture-card-large" style="--picture-color:${item.color}">
+        <img class="picture-image" src="${item.image}" alt="Tevékenység" />
+        <div class="image-fallback" aria-hidden="true">?</div>
+      </div>
+    </div>
+  `;
 }
 
 function renderMatchMode() {
@@ -693,7 +787,8 @@ function renderMatchMode() {
 function render() {
   if (state.screen === "lessons") renderLessonSelect();
   if (state.screen === "activities") renderActivityMenu();
-  if (state.screen === "game" && (state.mode === "word" || state.mode === "picture")) renderQuiz();
+  if (state.screen === "game" && (state.mode === "word" || state.mode === "picture" || state.mode === "sentence"))
+    renderQuiz();
   if (state.screen === "game" && state.mode === "match") renderMatchMode();
 }
 

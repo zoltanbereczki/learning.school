@@ -13,11 +13,12 @@ Currently integrated lessons (newest first in the app):
 
 ## Goal
 
-Given a new manual page or lesson name, add it as a selectable lesson in the app with the same three games:
+Given a new manual page or lesson name, add it as a selectable lesson in the app with the four games:
 
-- `Szó - szó`
-- `Kép - szó`
-- `Húzd össze`
+- `Szó - szó` — Hungarian prompt, Romanian answer choices.
+- `Kép - szó` — local image prompt, Romanian answer choices.
+- `Húzd össze` — Hungarian ↔ Romanian matching in batches of 5.
+- `Kép - mondat` — activity image prompt, full Romanian sentence as answer (only shown when the lesson has a `sentences` array with at least 4 entries).
 
 ## Step 1: Identify The Lesson
 
@@ -85,17 +86,40 @@ Template:
   words: [
     { id: "word-id", hu: "Hungarian", ro: "Romanian", image: "Images/SomeImage.png", color: "#0ea5e9" },
   ],
+  // Optional. Add when the manual page has a scene with named activities
+  // and short propositions. Min 4 entries to unlock the "Kép - mondat" game.
+  sentences: [
+    {
+      id: "s-action-id",
+      ro: "Romanian sentence.",
+      hu: "Magyar fordítás.",
+      image: "Images/ActivitySomethingP00.png",
+      color: "#0ea5e9",
+    },
+  ],
 }
 ```
 
 Rules:
 
-- `id` values must be ASCII and unique.
-- `hu` is the Hungarian meaning shown as the prompt.
+- `id` values must be ASCII and unique within their list (words and sentences are separate).
+- `hu` is the Hungarian meaning shown as the prompt for words; in sentences it is the Hungarian translation (not shown to the child).
 - `ro` is the Romanian answer shown on buttons.
-- `image` is used by the picture game.
+- `image` is used by the picture/sentence game.
 - Use local `Images/...` paths where possible.
 - Keep `sourceUrl` so the page badge opens the manual.
+
+### Activity images for `sentences`
+
+For the **Kép - mondat** game we crop **scenes** (not standalone object panels) from the manual.
+
+- Source: large scene PNG on the same manual page that shows multiple children doing different activities.
+- Convention: name with the prefix `Activity` + Romanian keyword + page suffix, e.g. `ActivityLeaganP100.png`, `ActivityCoardaP100.png`.
+- Keep enough context around the subject so the activity is recognisable, but the **main subject must not be truncated**.
+- Avoid panels that contain text or labels — `Kép - mondat` images are meant to be word-free scenes.
+- Each Romanian sentence comes from the page text (`Acesta este un teren de joacă...` style narration). Prefer the manual's own wording over invented sentences.
+
+For manual asset discovery, downloads, cropping, cleanup, and contact-sheet checks, follow `IMAGE_EXTRACTION_GUIDE.md`.
 
 ## Step 4: Verify
 
@@ -129,9 +153,10 @@ Check:
 - New lesson appears **first** (top-left) on the lesson selection screen.
 - Lesson cover image is correct.
 - Page badge opens the manual page.
-- All three games work.
+- All three (or four) games work.
 - Picture game images are fully visible and not animated.
 - Matching game uses 5-word batches.
+- If the lesson has `sentences`, the `Kép - mondat` card appears in the activity menu and the activity images load.
 
 ## Do Not Change Unless Asked
 
